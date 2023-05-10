@@ -1,0 +1,32 @@
+version: '3.7'
+
+services:
+  db:
+    image: postgres:14.5-alpine
+    container_name: db
+    restart: always
+    environment:
+      - POSTGRES_PASSWORD=postgres
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+    ports:
+      - "5432:5432"
+
+  server:
+    build: .
+    container_name: server
+    env_file:
+      - .env
+    volumes:
+      - .:/app
+    entrypoint: python src/main.py
+    ports:
+      - "8000:8000"
+    depends_on:
+      - db
+
+
+volumes:
+  pgdata:
+
+

@@ -1,0 +1,33 @@
+[tool.poetry]
+name = "cooking-calculator-service"
+version = "0.1"
+description = ""
+authors = ["alexeykudimov <work.alexeykudimov@gmail.com>"]
+license = "MIT"
+readme = "README.md"
+packages = []
+
+[tool.poetry.dependencies]
+python = "^3.11"
+fastapi = "^0.95.0"
+uvicorn = "^0.21.1"
+asyncpg = "^0.27.0"
+python-dotenv = "^1.0.0"
+aioredis = "^2.0.1"
+pytest = "^7.2.2"
+httpx = "^0.23.3"
+pyjwt = "^2.6.0"
+passlib = "^1.7.4"
+alembic = "^1.10.3"
+pytest-asyncio = "^0.21.0"
+sqlalchemy = {version = "^2.0.9", extras = ["asyncio"]}
+
+[tool.pytest.ini_options]
+pythonpath = [
+  ".", "src",
+]
+asyncio_mode="auto"
+
+[build-system]
+requires = ["poetry-core"]
+build-backend = "poetry.core.masonry.api"

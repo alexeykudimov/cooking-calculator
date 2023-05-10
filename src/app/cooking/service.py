@@ -1,5 +1,6 @@
 import logging
 from uuid import UUID
+from datetime import datetime, timedelta
 
 from fastapi import Depends, HTTPException
 from sqlalchemy import select
@@ -25,6 +26,19 @@ class CookingService:
         await self.db.commit()
 
         return recipe_history_object
+    
+    async def get_recent_recipes(self) -> List[str]:
+        hour_ago = datetime.utcnow() - timedelta(seconds=3600)
+        stmt = select(
+            RecipeHistory).where(
+            RecipeHistory.created_at > hour_ago).distinct(
+            RecipeHistory.recipe_id).options(selectinload(RecipeHistory.recipe))
+        recent_recipes = (await self.db.execute(stmt)).scalars().all()
+
+        if not recent_recipes:
+            raise HTTPException(status_code=418, detail="System didn't recommend recipes in the last hour")
+        
+        return [el.recipe.name for el in recent_recipes]
 
     async def calculate_recipes(self, payload: List[ComponentIn]) -> List[RecipeOut]:
         result = []

@@ -21,3 +21,15 @@ async def calculate_recipes(
     Case insensitive and protected for duplicates.
     '''
     return await cooking_service.calculate_recipes(payload)
+
+
+@router.get(
+        "/recipes/recent", 
+        status_code=200,
+        response_model=List[str])
+async def get_recent_recipes(
+        cooking_service: CookingService = Depends()):
+    '''
+    Get recommended by system recipes for the last hour
+    '''
+    return await cooking_service.get_recent_recipes()

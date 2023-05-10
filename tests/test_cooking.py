@@ -24,11 +24,15 @@ with_repeat_and_uppercase = [
     {"name": "мЯсО", "value": 500},
     {"name": "огурец", "value": 10}]
 
-async def test_all_recipes(ac: AsyncClient):
-    response = await ac.post("v1/recipes", json=all_recipes)
+async def test_no_recipes(ac: AsyncClient):
+    response = await ac.post("v1/recipes", json=no_recipes)
 
-    assert response.status_code == 200
-    assert len(response.json()) == 3
+    assert response.status_code == 418
+
+async def test_get_null_recent_recipes(ac: AsyncClient):
+    response = await ac.get("v1/recipes/recent")
+
+    assert response.status_code == 418
 
 async def test_all_recipes_but_enough_for_one(ac: AsyncClient):
     response = await ac.post("v1/recipes", json=all_recipes_but_enough_for_one)
@@ -38,10 +42,11 @@ async def test_all_recipes_but_enough_for_one(ac: AsyncClient):
     assert response.json()[0]['name'] == 'Салат «Ленинградский»'
     assert response.json()[0]['servings'] == 4
 
-async def test_no_recipes(ac: AsyncClient):
-    response = await ac.post("v1/recipes", json=no_recipes)
+async def test_get_one_recent_recipes(ac: AsyncClient):
+    response = await ac.get("v1/recipes/recent")
 
-    assert response.status_code == 418
+    assert response.status_code == 200
+    assert response.json() == ['Салат «Ленинградский»']
 
 async def test_with_repeat_and_uppercase(ac: AsyncClient):
     response = await ac.post("v1/recipes", json=with_repeat_and_uppercase)
@@ -50,3 +55,21 @@ async def test_with_repeat_and_uppercase(ac: AsyncClient):
     assert len(response.json()) == 1
     assert response.json()[0]['name'] == 'Салат «Русский»'
     assert response.json()[0]['servings'] == 3
+
+async def test_get_two_recent_recipes(ac: AsyncClient):
+    response = await ac.get("v1/recipes/recent")
+
+    assert response.status_code == 200
+    assert len(response.json()) == 2
+
+async def test_all_recipes(ac: AsyncClient):
+    response = await ac.post("v1/recipes", json=all_recipes)
+
+    assert response.status_code == 200
+    assert len(response.json()) == 3
+
+async def test_get_three_recent_recipes(ac: AsyncClient):
+    response = await ac.get("v1/recipes/recent")
+
+    assert response.status_code == 200
+    assert len(response.json()) == 3

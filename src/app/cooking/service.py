@@ -39,6 +39,28 @@ class CookingService:
             raise HTTPException(status_code=418, detail="System didn't recommend recipes in the last hour")
         
         return [el.recipe.name for el in recent_recipes]
+    
+    async def create_component(self, name: str) -> Component:
+        component_object = Component(name=name)
+        self.db.add(component_object)
+        await self.db.commit()
+
+        return component_object
+    
+    async def update_component_users(self, user_items_map: dict):
+        for name, value in user_items_map.items():
+            if not value:
+                continue
+
+            stmt = select(Component).where(Component.name == name)
+            component_object = (await self.db.execute(stmt)).scalar_one_or_none()
+
+            if not component_object:
+                component_object = await self.create_component(name)
+
+            component_object.users_count += 1
+        
+        await self.db.commit()
 
     async def calculate_recipes(self, payload: List[ComponentIn]) -> List[RecipeOut]:
         result = []
@@ -52,6 +74,9 @@ class CookingService:
                 user_items_map[item_name] += user_item.value
             else:
                 user_items_map[item_name] = user_item.value
+
+        # save user components for rating
+        await self.update_component_users(user_items_map)
 
         stmt = select(Recipe)
         recipes = (await self.db.execute(stmt)).scalars().all()

@@ -11,6 +11,7 @@ from src.config.settings import settings
 config = context.config
 config.set_main_option('sqlalchemy.url', settings.DATABASE_URL)
 
+from src.app.cooking.models import *
 from src.misc.database import metadata
 
 target_metadata = metadata

@@ -8,6 +8,7 @@
 * Async Alembic
 * Async Pytest
 ### :dart: Environment
+    LOGGING_LEVEL=<DEBUG for more information>
     SECRET_KEY=<your secret key>
 
     DATABASE_URL=postgresql+asyncpg://<db_user>:<db_pass>@<db_host>:<db_port>/<db_name>
@@ -16,6 +17,8 @@
     docker-compose up -d
 ### :dart: Migrate
     docker exec -it server alembic upgrade heads
+### :dart: Seeds
+    docker exec -it server python src/seeds.py
 ### :dart: Tests
     docker exec -it server pytest -v -s tests
 ### :dart: Let's go!

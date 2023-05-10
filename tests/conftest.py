@@ -12,6 +12,7 @@ from src.misc.database import metadata
 from src.main import app
 
 from src.config.settings import settings
+from src.seeds import seeds
 
 engine_test = create_async_engine(settings.TEST_DATABASE_URL, poolclass=NullPool)
 async_session_maker = sessionmaker(engine_test, class_=AsyncSession, expire_on_commit=False)
@@ -27,6 +28,8 @@ app.dependency_overrides[get_async_session] = override_get_async_session
 async def prepare_database():
     async with engine_test.begin() as conn:
         await conn.run_sync(metadata.create_all)
+    async with async_session_maker() as session:
+        await seeds(session)
     yield
     async with engine_test.begin() as conn:
         await conn.run_sync(metadata.drop_all)

@@ -2,10 +2,10 @@ import logging
 import uuid
 from datetime import datetime
 
-from sqlalchemy import Column, DateTime, String, ForeignKey, Integer
+from sqlalchemy import Column, DateTime, String, ForeignKey, Integer, Table
 from sqlalchemy.dialects.postgresql import UUID
 
-from src.misc.database import ModelBase
+from src.misc.database import ModelBase, metadata
 
 from sqlalchemy.orm import relationship
 
@@ -58,3 +58,18 @@ class RecipeComponent(ModelBase):
     
     def __str__(self):
         return f"{self.recipe_id}: {self.component_id}"
+
+
+class RecipeHistory(ModelBase):
+    __tablename__ = 'recipe_history'
+
+    id = Column(UUID(as_uuid=True), primary_key=True, default=uuid.uuid4)
+
+    recipe = relationship("Recipe")
+    recipe_id = Column(
+            UUID(as_uuid=True), ForeignKey("recipe.id", ondelete='CASCADE'))
+    
+    created_at = Column(DateTime, default=datetime.utcnow)
+    
+    def __str__(self):
+        return f"Recommended {self.recipe.name} at {self.created_at:%H:%M}"

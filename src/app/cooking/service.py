@@ -1,4 +1,5 @@
 import logging
+from uuid import UUID
 
 from fastapi import Depends, HTTPException
 from sqlalchemy import select
@@ -8,7 +9,7 @@ from src.misc.dependencies import get_async_session
 
 from typing import List
 from src.app.cooking.schemas import ComponentIn, RecipeOut
-from src.app.cooking.models import Recipe, Component, RecipeComponent
+from src.app.cooking.models import Recipe, Component, RecipeComponent, RecipeHistory
 
 logger = logging.getLogger(__name__)
 
@@ -17,6 +18,13 @@ class CookingService:
     def __init__(self,
                  db: AsyncSession = Depends(get_async_session)):
         self.db = db
+
+    async def save_recipe_history(self, recipe_id: UUID) -> RecipeHistory:
+        recipe_history_object = RecipeHistory(recipe_id=recipe_id)
+        self.db.add(recipe_history_object)
+        await self.db.commit()
+
+        return recipe_history_object
 
     async def calculate_recipes(self, payload: List[ComponentIn]) -> List[RecipeOut]:
         result = []
@@ -54,6 +62,7 @@ class CookingService:
                 continue
 
             result.append(RecipeOut(name=recipe.name, servings=servings))
+            await self.save_recipe_history(recipe.id)
 
         logger.debug(f"Result recipes => {[(r.name, r.servings) for r in result]}")
         if not result:

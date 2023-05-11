@@ -3,7 +3,7 @@ from fastapi import APIRouter, Depends, HTTPException
 from typing import List
 
 from src.app.cooking.service import CookingService
-from src.app.cooking.schemas import ComponentIn, RecipeOut
+from src.app.cooking.schemas import ComponentIn, RecipeOut, PopularComponentOut
 
 logger = logging.getLogger(__name__)
 router = APIRouter()
@@ -33,3 +33,16 @@ async def get_recent_recipes(
     Get recommended by system recipes for the last hour
     '''
     return await cooking_service.get_recent_recipes()
+
+
+@router.get(
+        "/components/popular", 
+        status_code=200,
+        response_model=List[PopularComponentOut])
+async def get_popular_components(
+        limit: int = 10,
+        cooking_service: CookingService = Depends()):
+    '''
+    Get popular components by users count (default limit = 10).
+    '''
+    return await cooking_service.get_popular_components(limit)

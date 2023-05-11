@@ -9,7 +9,7 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from src.misc.dependencies import get_async_session
 
 from typing import List
-from src.app.cooking.schemas import ComponentIn, RecipeOut
+from src.app.cooking.schemas import ComponentIn, RecipeOut, PopularComponentOut
 from src.app.cooking.models import Recipe, Component, RecipeComponent, RecipeHistory
 
 logger = logging.getLogger(__name__)
@@ -39,6 +39,17 @@ class CookingService:
             raise HTTPException(status_code=418, detail="System didn't recommend recipes in the last hour")
         
         return [el.recipe.name for el in recent_recipes]
+    
+    async def get_popular_components(self, limit: int) -> List[PopularComponentOut]:
+        stmt = select(Component).where(
+            Component.users_count > 0).order_by(
+            Component.users_count.desc()).limit(limit)
+        popular_components = (await self.db.execute(stmt)).scalars().all()
+
+        if not popular_components:
+            raise HTTPException(status_code=418, detail="No statistics yet!")
+        
+        return popular_components
     
     async def create_component(self, name: str) -> Component:
         component_object = Component(name=name)

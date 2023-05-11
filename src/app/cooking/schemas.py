@@ -9,3 +9,11 @@ class ComponentIn(BaseModel):
 class RecipeOut(BaseModel):
     name: str
     servings: int
+
+
+class PopularComponentOut(BaseModel):
+    name: str
+    users_count: int
+
+    class Config:
+        orm_mode = True
